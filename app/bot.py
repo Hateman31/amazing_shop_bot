@@ -58,10 +58,42 @@ def make_order(query):
 
 @bot.callback_query_handler(func=lambda q: q.data.startswith('add_item'))
 def add_item(query):
-    bot.answer_callback_query(
-        callback_query_id=query.id,
-        text=query.data)
+    # bot.answer_callback_query(
+    #     callback_query_id=query.id
+    #     , text=query.data
+    # )
+    # return
 
+    customer_id = query.from_user.id
+    product_id = int(query.data.replace('add_item_', ''))
+
+    product = db_client.get_product(product_id)
+    quantity = 1
+    # 1. Создать заказ (таблица Orders)
+    # 2. Получить order_id
+    order_id = db_client.create_order(customer_id)
+    # 3. Добавить запись в Order_Items , quantity = 1
+    # 4. Получить order_item_id
+    order_item_id = db_client.add_item_to_order(order_id, product_id)
+
+    # 5. Вывести меню:
+    #     - Добавить 1 шт.
+    #     - Отнять 1 шт.
+    #     - Ок
+    #     - Отмена
+    kb = types.InlineKeyboardMarkup(row_width=4)
+    kb.add(
+        types.InlineKeyboardButton('+1', callback_data=f'add_one{order_item_id}')
+        ,types.InlineKeyboardButton('🆗', callback_data=f'confirm{order_item_id}')
+        ,types.InlineKeyboardButton('❌', callback_data=f'cancel{order_item_id}')
+        , types.InlineKeyboardButton('-1', callback_data=f'reduce_one{order_item_id}')
+    )
+
+    bot.send_message(
+        chat_id=query.message.chat.id
+        , text= f'{product.name}({product.price}): {quantity} units'
+        ,reply_markup=kb
+    )
 
 
 @bot.callback_query_handler(func=lambda q: q.data.startswith('orders_history'))
@@ -82,6 +114,13 @@ def get_orders_history(query):
             chat_id=query.message.chat.id
             , text='You dont have any orders!'
         )
+
+@bot.callback_query_handler(func=lambda x: True)
+def order_menu(query):
+    bot.answer_callback_query(
+        callback_query_id=query.id
+        , text=query.data
+    )
 
 
 bot.infinity_polling()
