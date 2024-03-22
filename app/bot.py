@@ -5,10 +5,13 @@ import logging
 telebot.logger.setLevel(logging.INFO)
 from db_actions import SQL
 from db_config import CONN_STR
+from vedis import Vedis
 
 db_client = SQL(CONN_STR)
+shopping_cart = Vedis(':mem:')
 
 bot = telebot.TeleBot(config.token)
+
 
 @bot.message_handler(commands=['start'])
 def start(msg):
@@ -75,7 +78,7 @@ def add_item(query):
     # 3. Добавить запись в Order_Items , quantity = 1
     # 4. Получить order_item_id
     order_item_id = db_client.add_item_to_order(order_id, product_id)
-
+    shopping_cart.incr(order_item_id)
     # 5. Вывести меню:
     #     - Добавить 1 шт.
     #     - Отнять 1 шт.
@@ -115,11 +118,19 @@ def get_orders_history(query):
             , text='You dont have any orders!'
         )
 
-@bot.callback_query_handler(func=lambda x: True)
+@bot.callback_query_handler(func=lambda x: x.data.startswith('add_one'))
 def order_menu(query):
-    bot.answer_callback_query(
-        callback_query_id=query.id
-        , text=query.data
+    order_item_id = query.data.replace('add_one', '')
+    # shopping_cart[order_item_id] += 1
+
+    product_name = '***'
+    product_price = 111
+    quantity = shopping_cart.incr(order_item_id)
+
+    bot.edit_message_text(
+        message_id=query.message.id
+        ,chat_id=query.message.chat.id
+        , text=f'{product_name}({product_price}: {quantity})'
     )
 
 
