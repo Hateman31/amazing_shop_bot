@@ -167,7 +167,7 @@ class SQL:
                     result += table_row + '\n'
 
                 total = table[0]
-                total_str = f"{total[1]} {total[2]} {total[3]}"
+                total_str = f"{total[1]}: {total[2]} {total[3]}"
                 result += '-' * len(total_str) + '\n'
                 result += total_str
 
