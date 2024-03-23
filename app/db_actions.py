@@ -161,7 +161,7 @@ class SQL:
                 cursor.execute(sql, [order_id])
 
                 table = cursor.fetchall()
-                result = 'Product name  || Quantity || Full price'
+                result = 'Product name  || Quantity || Full price\n'
                 for _, product_name, quantity, full_price in table[1:]:
                     table_row = f'{product_name} || {quantity} || {full_price}'
                     result += table_row + '\n'
