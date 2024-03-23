@@ -128,7 +128,7 @@ def order_menu(query):
 
 
 @bot.callback_query_handler(func=lambda x: x.data.startswith('confirm_item'))
-def order_menu(query):
+def confirm_item(query):
     order_item_id = query.data.replace('confirm_item', '')
     order_id = db_client.get_order_id(order_item_id)
     print(order_id)
@@ -136,7 +136,7 @@ def order_menu(query):
     kb = get_catalog_kb(catalog, order_id)
 
     del shopping_cart[order_item_id]
-    
+
     bot.send_message(
         chat_id=query.message.chat.id
         , text='Choose item for your order:'
