@@ -1,0 +1,1 @@
+pipenv install pytelegrambotapi vedis
