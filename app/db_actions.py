@@ -171,3 +171,5 @@ class SQL:
                 result += '-' * len(total_str) + '\n'
                 result += total_str
 
+                return result
+
