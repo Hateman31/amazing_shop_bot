@@ -135,6 +135,8 @@ def order_menu(query):
     catalog = db_client.get_catalog(order_id)
     kb = get_catalog_kb(catalog, order_id)
 
+    del shopping_cart[order_item_id]
+    
     bot.send_message(
         chat_id=query.message.chat.id
         , text='Choose item for your order:'
