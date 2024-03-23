@@ -2,7 +2,12 @@
 CREATE TABLE Orders (
     order_id Serial PRIMARY KEY,
     customer_id INTEGER,
-    order_date date
+    order_date date,
+    -- 1 -- заказ создан
+    -- 2 -- заказ оплачен
+    -- 3 -- заказ отменен
+    status int default 1
+    check (status = 1 or status = 2 or status = 3)
 );
 
 -- Создание таблицы "Товары в заказе" (Order_Items)
