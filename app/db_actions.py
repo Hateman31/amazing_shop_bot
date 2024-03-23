@@ -145,7 +145,7 @@ class SQL:
 
     def get_order_summary(self, order_id):
         sql = ("with main as ( "+
-                "	select  1 x,product_name, '('|| quantity ||')' quantity, (price * quantity) full_price  "+
+                "	select  1 x,product_name,  quantity, (price * quantity) full_price  "+
                 "	from Order_Items oims "+
                 "	join Products p "+
                 "		on p.product_id = oims.product_id "+
@@ -161,7 +161,7 @@ class SQL:
                 cursor.execute(sql, [order_id])
 
                 table = cursor.fetchall()
-                result = 'Product name  || Quantity || Full price\n'
+                result = 'Product name  | Quantity | Full price\n'
                 for _, product_name, quantity, full_price in table[1:]:
                     table_row = f'{product_name} || {quantity} || {full_price}'
                     result += table_row + '\n'
