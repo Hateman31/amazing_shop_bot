@@ -6,6 +6,7 @@ telebot.logger.setLevel(logging.INFO)
 from db_actions import SQL
 from db_config import CONN_STR
 from vedis import Vedis
+from keyboards import *
 
 db_client = SQL(CONN_STR)
 shopping_cart = Vedis(':mem:')
@@ -42,15 +43,9 @@ def start(msg):
 
 @bot.callback_query_handler(func=lambda q: q.data.startswith('make_order'))
 def make_order(query):
-    kb = types.InlineKeyboardMarkup()
+
     catalog = db_client.get_catalog()
-    for item in catalog:
-        kb.add(
-            types.InlineKeyboardButton(
-                text=f'{item[1]}({item[2]})'
-                ,callback_data=f'add_item_{item[0]}'
-            )
-        )
+    kb = get_catalog_kb(catalog)
 
     bot.send_message(
         chat_id=query.message.chat.id
@@ -84,13 +79,9 @@ def add_item(query):
     #     - Отнять 1 шт.
     #     - Ок
     #     - Отмена
-    kb = types.InlineKeyboardMarkup(row_width=4)
-    kb.add(
-        types.InlineKeyboardButton('+1', callback_data=f'add_one{order_item_id}')
-        ,types.InlineKeyboardButton('🆗', callback_data=f'confirm{order_item_id}')
-        ,types.InlineKeyboardButton('❌', callback_data=f'cancel{order_item_id}')
-        , types.InlineKeyboardButton('-1', callback_data=f'reduce_one{order_item_id}')
-    )
+
+    kb = Order_Item_Menu(order_item_id)
+
 
     bot.send_message(
         chat_id=query.message.chat.id
@@ -123,15 +114,38 @@ def order_menu(query):
     order_item_id = query.data.replace('add_one', '')
     # shopping_cart[order_item_id] += 1
 
-    product_name = '***'
-    product_price = 111
+    product_name = query.message.text.split(':')[0]
     quantity = shopping_cart.incr(order_item_id)
+
+    kb = Order_Item_Menu(order_item_id)
 
     bot.edit_message_text(
         message_id=query.message.id
         ,chat_id=query.message.chat.id
-        , text=f'{product_name}({product_price}: {quantity})'
+        , text=f'{product_name}: {quantity} units'
+        , reply_markup=kb
     )
 
+
+@bot.callback_query_handler(func=lambda x: x.data.startswith('confirm_item'))
+def order_menu(query):
+    order_item_id = query.data.replace('confirm_item', '')
+    order_id = db_client.get_order_id(order_item_id)
+    print(order_id)
+    catalog = db_client.get_catalog(order_id)
+    kb = get_catalog_kb(catalog, order_id)
+
+    bot.send_message(
+        chat_id=query.message.chat.id
+        , text='Choose item for your order:'
+        , reply_markup=kb
+    )
+
+@bot.callback_query_handler(func=lambda x: True )
+def answer_any(query):
+    bot.answer_callback_query(
+        callback_query_id=query.id
+        ,text=query.data
+    )
 
 bot.infinity_polling()

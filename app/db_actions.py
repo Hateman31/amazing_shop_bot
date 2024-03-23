@@ -55,14 +55,22 @@ class SQL:
 
                 return cursor.fetchall()
 
-    def get_catalog(self):
-        catalog_query = 'select * from Products'
+    def get_catalog(self, order_id = None):
+        catalog_query = 'select * from Products '
+
         with psycopg2.connect(self.conn_str) as conn:
             with conn.cursor() as cursor:
-                cursor.execute(
-                    catalog_query
-                )
-
+                if order_id:
+                    catalog_query += (
+                        'where product_id not in ('
+                            'select product_id from Order_Items where order_id = %s)')
+                    cursor.execute(
+                        catalog_query, [order_id]
+                    )
+                else:
+                    cursor.execute(
+                        catalog_query
+                    )
                 return cursor.fetchall()
 
 
@@ -116,3 +124,11 @@ class SQL:
                 cursor.execute(sql, [prodcut_id])
                 product = cursor.fetchone()
                 return Product(product[0], product[1])
+
+
+    def get_order_id(self, order_item_id):
+        sql = 'select * from order_items where order_item_id = %s'
+        with psycopg2.connect(self.conn_str) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(sql, [order_item_id])
+                return cursor.fetchone()[0]
