@@ -145,7 +145,7 @@ class SQL:
 
     def get_order_summary(self, order_id):
         sql = ("with main as ( "+
-                "	select  1 x,product_name,  quantity, (price * quantity) full_price  "+
+                "	select  1 x,product_name,  quantity::text quantity, (price * quantity) full_price  "+
                 "	from Order_Items oims "+
                 "	join Products p "+
                 "		on p.product_id = oims.product_id "+
