@@ -141,3 +141,33 @@ class SQL:
             with conn.cursor() as cursor:
                 cursor.execute(sql, [order_item_id, quantity])
                 conn.commit()
+
+
+    def get_order_summary(self, order_id):
+        sql = ("with main as ( "+
+                "	select  1 x,product_name, '('|| quantity ||')' quantity, (price * quantity) full_price  "+
+                "	from Order_Items oims "+
+                "	join Products p "+
+                "		on p.product_id = oims.product_id "+
+                "	where order_id = %s "+
+                ")	 "+
+                "select * from main "+
+                "union  "+
+                "select  0 x,'Total', count(1) || ' items', sum(full_price)  "+
+                "from main "+
+                "order by 1 ")
+        with psycopg2.connect(self.conn_str) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(sql, [order_id])
+
+                table = cursor.fetchall()
+                result = 'Product name  || Quantity || Full price'
+                for _, product_name, quantity, full_price in table[1:]:
+                    table_row = f'{product_name} || {quantity} || {full_price}'
+                    result += table_row + '\n'
+
+                total = table[0]
+                total_str = f"{total[1]} {total[2]} {total[3]}"
+                result += '-' * len(total_str) + '\n'
+                result += total_str
+

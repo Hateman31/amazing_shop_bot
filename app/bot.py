@@ -146,6 +146,19 @@ def confirm_item(query):
         , reply_markup=kb
     )
 
+@bot.callback_query_handler(func=lambda x: x.data.startswith('confirm_order') )
+def confirm_order(query):
+    order_id = query.data.replace('confirm_order', '')
+
+    summary = db_client.get_order_summary(order_id)
+
+    bot.send_message(
+        chat_id=query.message.chat.id
+        , text= summary
+        , parse_mode='Markdown'
+        , reply_markup=order_confirmation_kb(order_id)
+    )
+
 @bot.callback_query_handler(func=lambda x: True )
 def answer_any(query):
     bot.answer_callback_query(
