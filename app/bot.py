@@ -135,6 +135,9 @@ def confirm_item(query):
     catalog = db_client.get_catalog(order_id)
     kb = get_catalog_kb(catalog, order_id)
 
+    quantity = int(shopping_cart[order_item_id])
+    db_client.set_item_quantity(order_item_id, quantity)
+
     del shopping_cart[order_item_id]
 
     bot.send_message(

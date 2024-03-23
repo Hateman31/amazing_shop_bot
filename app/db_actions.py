@@ -132,3 +132,12 @@ class SQL:
             with conn.cursor() as cursor:
                 cursor.execute(sql, [order_item_id])
                 return cursor.fetchone()[0]
+
+
+    def set_item_quantity(self, order_item_id, quantity):
+        sql = ('update order_items set quantity = %s '
+               'where order_item_id = %s')
+        with psycopg2.connect(self.conn_str) as conn:
+            with conn.cursor() as cursor:
+                cursor.execute(sql, [order_item_id, quantity])
+                conn.commit()
