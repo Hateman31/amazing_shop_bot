@@ -18,6 +18,8 @@ def order_confirmation_kb(order_id):
 def get_catalog_kb(catalog, order_id = None):
     kb = types.InlineKeyboardMarkup()
 
+    order_id = order_id or ''
+
     cancel_btn = types.InlineKeyboardButton(
                 text='Cancel'
                 ,callback_data=f'cancel_order{order_id}'
