@@ -28,7 +28,7 @@ def get_catalog_kb(catalog, order_id = None):
         item_id, product_name, price,  _ = item
         kb.add(
             types.InlineKeyboardButton(
-                text=f'{product_name}({price})'
+                text=f'{product_name}({price}$)'
                 , callback_data=f'add_item_{item_id}'
             )
         )
