@@ -1,5 +1,6 @@
 import config
 import telebot
+from telebot import formatting
 from telebot import types
 import logging
 telebot.logger.setLevel(logging.INFO)
@@ -43,8 +44,12 @@ def start(msg):
 
 @bot.callback_query_handler(func=lambda q: q.data.startswith('make_order'))
 def make_order(query):
+    customer_id = query.from_user.id
+    order_id = db_client.create_order(customer_id)
+    print('make_order', order_id)
+    shopping_cart[customer_id] = order_id
 
-    catalog = db_client.get_catalog()
+    catalog = db_client.get_catalog(order_id)
     kb = get_catalog_kb(catalog)
 
     bot.send_message(
@@ -56,12 +61,6 @@ def make_order(query):
 
 @bot.callback_query_handler(func=lambda q: q.data.startswith('add_item'))
 def add_item(query):
-    # bot.answer_callback_query(
-    #     callback_query_id=query.id
-    #     , text=query.data
-    # )
-    # return
-
     customer_id = query.from_user.id
     product_id = int(query.data.replace('add_item_', ''))
 
@@ -69,10 +68,16 @@ def add_item(query):
     quantity = 1
     # 1. Создать заказ (таблица Orders)
     # 2. Получить order_id
-    order_id = db_client.create_order(customer_id)
+    order_id = int(shopping_cart[customer_id])
+
     # 3. Добавить запись в Order_Items , quantity = 1
     # 4. Получить order_item_id
-    order_item_id = db_client.add_item_to_order(order_id, product_id)
+    try:
+        order_item_id = db_client.add_item_to_order(order_id, product_id)
+    except:
+        print('add_item ', order_id)
+        raise SystemExit
+
     shopping_cart.incr(order_item_id)
     # 5. Вывести меню:
     #     - Добавить 1 шт.
@@ -165,5 +170,14 @@ def answer_any(query):
         callback_query_id=query.id
         ,text=query.data
     )
+
+bot.delete_my_commands(
+    scope=types.BotCommandScopeDefault()
+)
+bot.set_my_commands(
+    commands=[
+        types.BotCommand('/start', 'Deal with shopping!'),
+    ]
+)
 
 bot.infinity_polling()
