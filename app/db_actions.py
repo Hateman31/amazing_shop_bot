@@ -135,11 +135,12 @@ class SQL:
 
 
     def set_item_quantity(self, order_item_id, quantity):
-        sql = ('update order_items set quantity = %s '
-               'where order_item_id = %s')
+        sql = ('update public.order_items set quantity = %s '
+                + 'where order_item_id = %s')
+        # print(f'{order_item_id=}, {quantity=}')
         with psycopg2.connect(self.conn_str) as conn:
             with conn.cursor() as cursor:
-                cursor.execute(sql, [order_item_id, quantity])
+                cursor.execute(sql, [quantity, order_item_id])
                 conn.commit()
 
 
@@ -156,6 +157,7 @@ class SQL:
                 "select  0 x,'Total', count(1) || ' items', sum(full_price)  "+
                 "from main "+
                 "order by 1 ")
+        # print(order_id)
         with psycopg2.connect(self.conn_str) as conn:
             with conn.cursor() as cursor:
                 cursor.execute(sql, [order_id])
@@ -172,4 +174,12 @@ class SQL:
                 result += total_str
 
                 return result
+
+
+if __name__ == '__main__':
+    from db_config import CONN_STR
+
+    db_client = SQL(CONN_STR)
+
+    db_client.set_item_quantity(7, 3)
 
