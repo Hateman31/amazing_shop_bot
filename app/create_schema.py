@@ -9,7 +9,7 @@ def create_schema(conn_str, sql):
             print('Connection is created!')
             with conn.cursor() as cursor:
                 cursor.execute(sql)
-                print('Database are configured!')
+                print('Database is created!')
     except psycopg2.DatabaseError as err:
         raise err
 
