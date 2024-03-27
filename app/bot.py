@@ -115,12 +115,14 @@ def get_orders_history(query):
         )
 
 @bot.callback_query_handler(func=lambda x: x.data.startswith('add_one'))
-def order_menu(query):
-    order_item_id = query.data.replace('add_one', '')
+def item_menu(query):
+    order_item_id = int(query.data.replace('add_one', ''))
     # shopping_cart[order_item_id] += 1
 
     product_name = query.message.text.split(':')[0]
     quantity = shopping_cart.incr(order_item_id)
+
+    db_client.set_item_quantity(order_item_id, quantity)
 
     kb = Order_Item_Menu(order_item_id)
 
@@ -171,9 +173,10 @@ def answer_any(query):
         ,text=query.data
     )
 
-bot.delete_my_commands(
-    scope=types.BotCommandScopeDefault()
-)
+# bot.delete_my_commands(
+#     scope=types.BotCommandScopeDefault()
+# )
+
 bot.set_my_commands(
     commands=[
         types.BotCommand('/start', 'Deal with shopping!'),
