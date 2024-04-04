@@ -52,7 +52,16 @@ with main as (
 		on p.product_id = oims.product_id
 	group by order_id
 )
-select order_date, coalesce(full_price,0) full_price, customer_id
+select
+    order_date
+    , coalesce(full_price,0) full_price
+    , customer_id
+    , 'Order ' || (
+            case
+                when 1 then 'created'
+                when 2 then 'paid'
+                else 'canceled'
+            end) status
 from Orders
 left join main
 	on Orders.order_id = main.order_id;
