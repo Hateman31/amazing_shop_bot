@@ -189,6 +189,11 @@ class SQL:
         )
         self.execute_sql(sql, order_id)
 
+    def get_order_history(self):
+        sql = 'select * from Orders_history_vw where customer_id = %s'
+        
+        pass
+
 
 if __name__ == '__main__':
     from db_config import CONN_STR
