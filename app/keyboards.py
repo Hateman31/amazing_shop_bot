@@ -11,8 +11,9 @@ def Order_Item_Menu(order_item_id):
 
 def order_confirmation_kb(order_id):
     return types.InlineKeyboardMarkup(row_width=4).add(
-        types.InlineKeyboardButton('🆗', callback_data=f'confirm_order{order_id}')
-        , types.InlineKeyboardButton('❌', callback_data=f'cancel_order{order_id}')
+        types.InlineKeyboardButton('Pay 💲', callback_data=f'pay_order{order_id}')
+        , types.InlineKeyboardButton('Edit 📝', callback_data=f'edit_order{order_id}')
+        , types.InlineKeyboardButton('Cancel ❌', callback_data=f'cancel_order{order_id}')
     )
 
 def get_catalog_kb(catalog, order_id = None):
