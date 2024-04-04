@@ -46,7 +46,7 @@ def start(msg):
 def make_order(query):
     customer_id = query.from_user.id
     order_id = db_client.create_order(customer_id)
-    # print('make_order', order_id)
+
     shopping_cart[customer_id] = order_id
 
     catalog = db_client.get_catalog(order_id)
@@ -80,7 +80,7 @@ def add_item(query):
     try:
         order_item_id = db_client.add_item_to_order(order_id, product_id)
     except:
-        print('add_item ', order_id)
+        # print('add_item ', order_id)
         raise SystemExit
 
     shopping_cart.incr(order_item_id)
@@ -89,6 +89,7 @@ def add_item(query):
     #     - Отнять 1 шт.
     #     - Ок
     #     - Отмена
+
 
     kb = Order_Item_Menu(order_item_id)
 
@@ -127,7 +128,6 @@ def get_orders_history(query):
 @bot.callback_query_handler(func=lambda x: x.data.startswith('add_one'))
 def item_menu(query):
     order_item_id = int(query.data.replace('add_one', ''))
-    # shopping_cart[order_item_id] += 1
 
     product_name = query.message.text.split(':')[0]
     quantity = shopping_cart.incr(order_item_id)
@@ -148,7 +148,7 @@ def item_menu(query):
 def confirm_item(query):
     order_item_id = query.data.replace('confirm_item', '')
     order_id = db_client.get_order_id(order_item_id)
-    print(order_id)
+
     catalog = db_client.get_catalog(order_id)
     kb = get_catalog_kb(catalog, order_id)
 
@@ -170,12 +170,16 @@ def confirm_item(query):
 @bot.callback_query_handler(func=lambda x: x.data.startswith('confirm_order') )
 def confirm_order(query):
     order_id = query.data.replace('confirm_order', '')
-
     summary = db_client.get_order_summary(order_id)
 
     bot.delete_message(
         chat_id=query.message.chat.id
         ,message_id=query.message.id
+    )
+
+    bot.answer_callback_query(
+        callback_query_id=query.id
+        , text=f'Ваш заказ #{order_id} готов к оплате.'
     )
 
     bot.send_message(
@@ -184,6 +188,32 @@ def confirm_order(query):
         , parse_mode='Markdown'
         , reply_markup=order_confirmation_kb(order_id)
     )
+
+@bot.callback_query_handler(func=lambda x: x.data.startswith('pay_order'))
+def pay_order(query):
+    pass
+
+@bot.callback_query_handler(func=lambda x: x.data.startswith('edit_order'))
+def pay_order(query):
+    pass
+
+
+@bot.callback_query_handler(func=lambda x: x.data.startswith('cancel_order'))
+def pay_order(query):
+    order_id = query.data.replace('cancel_order', '')
+
+    db_client.cancel_order(order_id)
+
+    bot.delete_message(
+        chat_id=query.message.chat.id
+        ,message_id=query.message.id
+    )
+
+    bot.answer_callback_query(
+        callback_query_id=query.id
+        , text=f'Your order #{order_id} canceled.'
+    )
+
 
 @bot.callback_query_handler(func=lambda x: True )
 def answer_any(query):
@@ -202,4 +232,4 @@ bot.set_my_commands(
     ]
 )
 
-bot.infinity_polling()
+bot.polling()
