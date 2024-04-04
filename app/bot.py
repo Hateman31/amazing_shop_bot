@@ -46,11 +46,16 @@ def start(msg):
 def make_order(query):
     customer_id = query.from_user.id
     order_id = db_client.create_order(customer_id)
-    print('make_order', order_id)
+    # print('make_order', order_id)
     shopping_cart[customer_id] = order_id
 
     catalog = db_client.get_catalog(order_id)
     kb = get_catalog_kb(catalog)
+
+    bot.delete_message(
+        chat_id=query.message.chat.id
+        ,message_id=query.message.id
+    )
 
     bot.send_message(
         chat_id=query.message.chat.id
@@ -87,6 +92,11 @@ def add_item(query):
 
     kb = Order_Item_Menu(order_item_id)
 
+
+    bot.delete_message(
+        chat_id=query.message.chat.id
+        ,message_id=query.message.id
+    )
 
     bot.send_message(
         chat_id=query.message.chat.id
@@ -147,6 +157,10 @@ def confirm_item(query):
 
     del shopping_cart[order_item_id]
 
+    bot.delete_message(
+        query.message.chat.id
+        , query.message.id)
+
     bot.send_message(
         chat_id=query.message.chat.id
         , text='Choose item for your order:'
@@ -159,9 +173,14 @@ def confirm_order(query):
 
     summary = db_client.get_order_summary(order_id)
 
+    bot.delete_message(
+        chat_id=query.message.chat.id
+        ,message_id=query.message.id
+    )
+
     bot.send_message(
         chat_id=query.message.chat.id
-        , text= summary
+        , text = summary
         , parse_mode='Markdown'
         , reply_markup=order_confirmation_kb(order_id)
     )
