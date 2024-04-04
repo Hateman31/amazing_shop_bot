@@ -19,8 +19,16 @@ bot = telebot.TeleBot(config.token)
 def start(msg):
     show_start_menu(msg)
 
-def show_start_menu(msg):
-    client = db_client.get_customer(msg.from_user.id)
+def show_start_menu(event):
+    chat_id = None
+    if type(event) == types.Message:
+        chat_id = event.chat.id
+    else:
+        chat_id = event.message.chat.id
+
+    client = db_client.get_customer(event.from_user.id)
+    print(f'show_start_menu__func {client=} {event.from_user.id=}')
+
     kb=types.InlineKeyboardMarkup().add(
         types.InlineKeyboardButton(
             text='Make order'
@@ -33,15 +41,15 @@ def show_start_menu(msg):
     )
     if client:
         bot.send_message(
-            chat_id=msg.chat.id
+            chat_id=chat_id
             ,text='What do you wish?'
             ,reply_markup=kb
         )
     else:
-        db_client.add_new_customer(msg.from_user.id)
+        db_client.add_new_customer(event.from_user.id)
         bot.send_message(
-            chat_id=msg.chat.id
-            , text=f'Welcome to our online store,  {msg.from_user.first_name}!'
+            chat_id=chat_id
+            , text=f'Welcome to our online store,  {event.from_user.first_name}!'
             , reply_markup=kb
         )
 
@@ -212,7 +220,7 @@ def pay_order(query):
         ,message_id=query.message.id
     )
 
-    show_start_menu(query.message)
+    show_start_menu(query)
 
 
 @bot.callback_query_handler(func=lambda x: True )
