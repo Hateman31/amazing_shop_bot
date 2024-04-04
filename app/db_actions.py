@@ -198,10 +198,10 @@ class SQL:
         )
         self.execute_sql(sql, order_id)
 
-    def get_order_history(self):
+    def get_order_history(self, customer_id):
         sql = 'select * from Orders_history_vw where customer_id = %s'
 
-        pass
+        return self.fetch_rows(sql, customer_id)
 
 
 if __name__ == '__main__':
