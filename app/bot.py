@@ -17,6 +17,9 @@ bot = telebot.TeleBot(config.token)
 
 @bot.message_handler(commands=['start'])
 def start(msg):
+    show_start_menu(msg)
+
+def show_start_menu(msg):
     client = db_client.get_customer(msg.from_user.id)
     kb=types.InlineKeyboardMarkup().add(
         types.InlineKeyboardButton(
@@ -209,10 +212,7 @@ def pay_order(query):
         ,message_id=query.message.id
     )
 
-    bot.answer_callback_query(
-        callback_query_id=query.id
-        , text=f'Your order #{order_id} canceled.'
-    )
+    show_start_menu(query.message)
 
 
 @bot.callback_query_handler(func=lambda x: True )
