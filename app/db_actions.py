@@ -127,7 +127,7 @@ class SQL:
 
 
     def get_order_id(self, order_item_id):
-        sql = 'select * from order_items where order_item_id = %s'
+        sql = 'select order_id from order_items where order_item_id = %s'
         with psycopg2.connect(self.conn_str) as conn:
             with conn.cursor() as cursor:
                 cursor.execute(sql, [order_item_id])
@@ -175,11 +175,22 @@ class SQL:
 
                 return result
 
+    def pay_order(self, order_id):
+        sql = (
+                'update orders set status = 2'
+                'where order_id = %s'
+        )
+        self.execute_sql(sql, order_id)
+
+    def cancel_order(self, order_id):
+        sql = (
+                'update orders set status = 3 '
+                'where order_id = %s'
+        )
+        self.execute_sql(sql, order_id)
+
 
 if __name__ == '__main__':
     from db_config import CONN_STR
 
     db_client = SQL(CONN_STR)
-
-    db_client.set_item_quantity(7, 3)
-
