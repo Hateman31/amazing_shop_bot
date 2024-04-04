@@ -23,6 +23,15 @@ class SQL:
         except psycopg2.DatabaseError as err:
             raise err
 
+    def fetch_rows(self, sql, *params):
+        with psycopg2.connect(self.conn_str) as conn:
+            with conn.cursor() as cursor:
+                if params:
+                    cursor.execute(sql, params)
+                else:
+                    cursor.execute(sql)
+                return cursor.fetchall()
+
     def add_new_customer(self, user_id):
         query_ = (
             'insert into customers(customer_id) '
@@ -191,7 +200,7 @@ class SQL:
 
     def get_order_history(self):
         sql = 'select * from Orders_history_vw where customer_id = %s'
-        
+
         pass
 
 
