@@ -223,6 +223,17 @@ def pay_order(query):
     show_start_menu(query)
 
 
+
+
+@bot.callback_query_handler(func=lambda x: x.data.startswith('orders_history') )
+def orders_history(query):
+    orders_history_table = 'Nothing'
+
+    bot.answer_callback_query(
+        callback_query_id=query.id
+        ,text=orders_history_table
+    )
+
 @bot.callback_query_handler(func=lambda x: True )
 def answer_any(query):
     bot.answer_callback_query(
