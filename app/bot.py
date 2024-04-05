@@ -204,9 +204,13 @@ def confirm_order(query):
 @bot.callback_query_handler(func=lambda x: x.data.startswith('pay_order'))
 def pay_order(query):
 
+    order_id = query.data.replace('pay_order', '')
+
+    # print(order_id)
+    total_price = db_client.get_order_total_price(order_id)
+
     prices = [
-        LabeledPrice(label='Working Time Machine', amount=5750)
-        , LabeledPrice('Gift wrapping', 500)
+        LabeledPrice(label='Working Time Machine', amount=total_price * 100)
     ]
 
     bot.send_invoice(
