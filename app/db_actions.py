@@ -184,6 +184,16 @@ class SQL:
 
                 return result
 
+    def get_order_total_price(self, order_id):
+        sql = """select sum(price*quantity) full_price
+                from Order_items oims
+                join Products p
+                    on p.product_id = oims.product_id
+                    and order_id = %s
+                group by order_id"""
+
+        return self.fetch_rows(sql, order_id)[0][0]
+
     def pay_order(self, order_id):
         sql = (
                 'update orders set status = 2'
