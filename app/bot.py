@@ -205,12 +205,12 @@ def pay_order(query):
     pass
 
 @bot.callback_query_handler(func=lambda x: x.data.startswith('edit_order'))
-def pay_order(query):
+def edit_order(query):
     pass
 
 
 @bot.callback_query_handler(func=lambda x: x.data.startswith('cancel_order'))
-def pay_order(query):
+def cancel_order(query):
     order_id = query.data.replace('cancel_order', '')
 
     db_client.cancel_order(order_id)
@@ -241,9 +241,7 @@ def answer_any(query):
         ,text=query.data
     )
 
-# bot.delete_my_commands(
-#     scope=types.BotCommandScopeDefault()
-# )
+# bot.send_invoice()
 
 bot.set_my_commands(
     commands=[
