@@ -210,7 +210,7 @@ def pay_order(query):
     total_price = db_client.get_order_total_price(order_id)
 
     prices = [
-        LabeledPrice(label='Working Time Machine', amount=total_price * 100)
+        LabeledPrice(label='Working Time Machine', amount=int(total_price * 100))
     ]
 
     bot.send_invoice(
