@@ -191,8 +191,8 @@ class SQL:
                     on p.product_id = oims.product_id
                     and order_id = %s
                 group by order_id"""
-        
-        return self.fetch_rows(sql, [order_id])[0][0]
+
+        return self.fetch_rows(sql, order_id)[0][0]
 
     def pay_order(self, order_id):
         sql = (
