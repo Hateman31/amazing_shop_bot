@@ -8,6 +8,7 @@ from db_actions import SQL
 from db_config import CONN_STR
 from vedis import Vedis
 from keyboards import *
+from telebot.types import LabeledPrice, ShippingOption
 
 db_client = SQL(CONN_STR)
 shopping_cart = Vedis(':mem:')
@@ -202,7 +203,53 @@ def confirm_order(query):
 
 @bot.callback_query_handler(func=lambda x: x.data.startswith('pay_order'))
 def pay_order(query):
-    pass
+
+    prices = [
+        LabeledPrice(label='Working Time Machine', amount=5750)
+        , LabeledPrice('Gift wrapping', 500)
+    ]
+
+    bot.send_invoice(
+        query.message.chat.id,  # chat_id
+        'Working Time Machine',  # title
+        ' Want to visit your great-great-great-grandparents? Make a fortune at the races? Shake hands with Hammurabi and take a stroll in the Hanging Gardens? Order our Working Time Machine today!',
+        # description
+        'HAPPY FRIDAYS COUPON',  # invoice_payload
+        config.payment_api_token,  # provider_token
+        'rub',  # currency
+        prices,  # prices
+        photo_url='http://erkelzaar.tsudao.com/models/perrotta/TIME_MACHINE.jpg',
+        photo_height=512,  # !=0/None or picture won't be shown
+        photo_width=512,
+        photo_size=512,
+        is_flexible=False,  # True If you need to set up Shipping Fee
+        start_parameter='time-machine-example'
+    )
+
+@bot.pre_checkout_query_handler(func=lambda query: True)
+def checkout(pre_checkout_query):
+    bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True,
+                                  error_message="Aliens tried to steal your card's CVV, but we successfully protected your credentials,"
+                                                " try to pay again in a few minutes, we need a small rest.")
+@bot.shipping_query_handler(func=lambda query: True)
+def shipping(shipping_query):
+    print(shipping_query)
+    # bot.answer_shipping_query(shipping_query.id, ok=True, shipping_options=shipping_options,
+    #                           error_message='Oh, seems like our Dog couriers are having a lunch right now. Try again later!')
+
+
+@bot.message_handler(content_types=['successful_payment'])
+def got_payment(message):
+    bot.delete_message(
+        chat_id=message.chat.id
+        ,message_id=message.id
+    )
+
+    bot.send_message(message.chat.id,
+                     'Hoooooray! Thanks for payment! We will proceed your order for `{} {}` as fast as possible! '
+                     'Stay in touch.\n\nUse /buy again to get a Time Machine for your friend!'.format(
+                         message.successful_payment.total_amount / 100, message.successful_payment.currency),
+                     parse_mode='Markdown')
 
 @bot.callback_query_handler(func=lambda x: x.data.startswith('edit_order'))
 def edit_order(query):
@@ -221,9 +268,6 @@ def cancel_order(query):
     )
 
     show_start_menu(query)
-
-
-
 
 @bot.callback_query_handler(func=lambda x: x.data.startswith('orders_history') )
 def orders_history(query):
