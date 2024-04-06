@@ -9,6 +9,9 @@ from db_config import CONN_STR
 from vedis import Vedis
 from keyboards import *
 from telebot.types import LabeledPrice, ShippingOption
+import utils
+from pathlib import Path
+from datetime import datetime
 
 db_client = SQL(CONN_STR)
 shopping_cart = Vedis(':mem:')
@@ -120,17 +123,33 @@ def add_item(query):
 
 @bot.callback_query_handler(func=lambda q: q.data.startswith('orders_history'))
 def get_orders_history(query):
-    orders = db_client.get_orders_history(query.from_user.id)
+    user_id = query.from_user.id
+    orders = db_client.get_orders_history(user_id)
+    now = datetime.now()
+    headers = 'order_date full_price'.split(' ')
+
+    folder = Path.cwd().parent / "docs"
+    if folder.exists():
+        fname = folder / f'{user_id}_' + f'{now.year}-{now.month}-{now.day}_{now.hour}-{now.minute}.csv'
+    else:
+        folder.mkdir()
+
+    utils.rows_to_csv(orders, fname, headers=headers)
 
     bot.delete_message(
         chat_id=query.message.chat.id
         ,message_id=query.message.id
     )
     if orders:
+        bot.send_document(
+            chat_id=query.message.chat.id
+            , document= fname.read_file()
+        )
         bot.send_message(
             chat_id=query.message.chat.id
-            , text=orders
+            , text='This is containing all your purchases!'
         )
+
     else:
         bot.send_message(
             chat_id=query.message.chat.id
