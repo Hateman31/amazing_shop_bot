@@ -244,10 +244,10 @@ def shipping(shipping_query):
 
 @bot.message_handler(content_types=['successful_payment'])
 def got_payment(message):
-    bot.delete_message(
-        chat_id=message.chat.id
-        ,message_id=message.id
-    )
+    # bot.delete_message(
+    #     chat_id=message.chat.id
+    #     ,message_id=message.id
+    # )
 
     bot.send_message(message.chat.id,
                      'Hoooooray! Thanks for payment! We will proceed your order for `{} {}` as fast as possible! '
