@@ -286,7 +286,8 @@ def edit_order(query):
 def cancel_order(query):
     order_id = query.data.replace('cancel_order', '')
 
-    db_client.cancel_order(order_id)
+    if order_id:
+        db_client.cancel_order(order_id)
 
     bot.delete_message(
         chat_id=query.message.chat.id
