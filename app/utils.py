@@ -1,6 +1,6 @@
 
 def rows_to_csv(rows,filename, headers=None):
-    with open(f'{filename}.csv', 'w') as csv:
+    with open(filename, 'w') as csv:
         if headers:
             for header in headers:
                 csv.write(f"{header}\t")
@@ -20,7 +20,7 @@ if __name__ == '__main__':
 
     db_client = SQL(CONN_STR)
 
-    fname = Path.cwd() / 'test'
+    fname = Path.cwd() / 'test.csv'
     rows = db_client.get_catalog()
     headers = 'product_id product_name price category'.split(' ')
 
