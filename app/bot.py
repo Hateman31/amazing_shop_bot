@@ -213,6 +213,9 @@ def pay_order(query):
         LabeledPrice(label='Working Time Machine', amount=int(total_price * 100))
     ]
 
+    customer_id = query.from_user.id
+    shopping_cart[customer_id] = order_id
+
     bot.send_invoice(
         query.message.chat.id,  # chat_id
         'Working Time Machine',  # title
@@ -244,10 +247,10 @@ def shipping(shipping_query):
 
 @bot.message_handler(content_types=['successful_payment'])
 def got_payment(message):
-    # bot.delete_message(
-    #     chat_id=message.chat.id
-    #     ,message_id=message.id
-    # )
+    customer_id = message.from_user.id
+    order_id = int(shopping_cart[customer_id])
+
+    db_client.pay_order(order_id)
 
     bot.send_message(message.chat.id,
                      'Hoooooray! Thanks for payment! We will proceed your order for `{} {}` as fast as possible! '
