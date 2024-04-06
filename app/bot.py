@@ -228,6 +228,12 @@ def pay_order(query):
     # print(order_id)
     total_price = db_client.get_order_total_price(order_id)
 
+    bot.edit_message_reply_markup(
+        chat_id=query.message.chat.id
+        ,message_id=query.message.id
+        ,reply_markup=None
+    )
+
     prices = [
         LabeledPrice(label='Working Time Machine', amount=int(total_price * 100))
     ]
@@ -235,7 +241,7 @@ def pay_order(query):
     customer_id = query.from_user.id
     shopping_cart[customer_id] = order_id
 
-    bot.send_invoice(
+    invoice = bot.send_invoice(
         query.message.chat.id,  # chat_id
         'Working Time Machine',  # title
         ' Want to visit your great-great-great-grandparents? Make a fortune at the races? Shake hands with Hammurabi and take a stroll in the Hanging Gardens? Order our Working Time Machine today!',
@@ -252,8 +258,12 @@ def pay_order(query):
         start_parameter='time-machine-example'
     )
 
+
+
+
 @bot.pre_checkout_query_handler(func=lambda query: True)
 def checkout(pre_checkout_query):
+    print(pre_checkout_query)
     bot.answer_pre_checkout_query(pre_checkout_query.id, ok=True,
                                   error_message="Aliens tried to steal your card's CVV, but we successfully protected your credentials,"
                                                 " try to pay again in a few minutes, we need a small rest.")
