@@ -128,12 +128,12 @@ def get_orders_history(query):
     now = datetime.now()
     headers = 'order_date full_price'.split(' ')
 
-    folder = Path.cwd().parent / "docs"
-    if folder.exists():
-        fname = folder / f'{user_id}_' + f'{now.year}-{now.month}-{now.day}_{now.hour}-{now.minute}.csv'
-    else:
+    folder = Path.cwd().parent / "docs" / f'{user_id}'
+
+    if not folder.exists():
         folder.mkdir()
 
+    fname = folder / f'{now.year}-{now.month}-{now.day}_{now.hour}-{now.minute}.csv'
     utils.rows_to_csv(orders, fname, headers=headers)
 
     bot.delete_message(
@@ -143,13 +143,13 @@ def get_orders_history(query):
     if orders:
         bot.send_document(
             chat_id=query.message.chat.id
-            , document= fname.read_file()
+            , document= open(fname, 'rb').read()
+            , visible_file_name=fname.name
         )
         bot.send_message(
             chat_id=query.message.chat.id
-            , text='This is containing all your purchases!'
+            , text='This file is containing all your purchases!'
         )
-
     else:
         bot.send_message(
             chat_id=query.message.chat.id
