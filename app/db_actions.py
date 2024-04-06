@@ -195,18 +195,19 @@ class SQL:
         return self.fetch_rows(sql, order_id)[0][0]
 
     def pay_order(self, order_id):
-        sql = (
-                'update orders set status = 2'
-                'where order_id = %s'
-        )
-        self.execute_sql(sql, order_id)
+        self.__set_order_status(order_id, 2)
 
     def cancel_order(self, order_id):
+        self.__set_order_status(order_id, 3)
+
+
+    def __set_order_status(self, order_id, status):
         sql = (
-                'update orders set status = 3 '
-                'where order_id = %s'
+            'update orders set status = %s '
+            'where order_id = %s'
         )
-        self.execute_sql(sql, order_id)
+        self.execute_sql(sql, status, order_id)
+
 
     def get_order_history(self, customer_id):
         sql = 'select * from Orders_history_vw where customer_id = %s'
