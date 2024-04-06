@@ -53,17 +53,6 @@ class SQL:
 
                 return cursor.fetchone()
 
-    def get_orders_history(self, user_id):
-        with psycopg2.connect(self.conn_str) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(
-                    'select order_date, full_price from '
-                      + 'Orders_history_vw where customer_id = %s '
-                    , [user_id]
-                )
-
-                return cursor.fetchall()
-
     def get_catalog(self, order_id = None):
         catalog_query = 'select * from Products '
 
@@ -209,10 +198,15 @@ class SQL:
         self.execute_sql(sql, status, order_id)
 
 
-    def get_order_history(self, customer_id):
-        sql = 'select * from Orders_history_vw where customer_id = %s'
-
-        return self.fetch_rows(sql, customer_id)
+    def get_orders_history(self, customer_id, period=None):
+        if not period:
+            sql = 'select * from Orders_history_vw where customer_id = %s'
+            return self.fetch_rows(sql, customer_id)
+        else:
+            interval = f'{period} month'
+            sql = 'select * from Orders_history_vw where customer_id = %s '\
+                  "and order_date > (now()::date - interval %s )"
+            return self.fetch_rows(sql, customer_id, interval)
 
 
 if __name__ == '__main__':
