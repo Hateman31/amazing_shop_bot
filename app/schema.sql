@@ -20,7 +20,7 @@ CREATE TABLE Order_Items (
 
 -- Создание таблицы "Клиенты" (Customers)
 CREATE TABLE Customers (
-    customer_id int PRIMARY KEY
+    customer_id BIGINT PRIMARY KEY
 );
 
 -- Создание таблицы "Товары" (Products)
@@ -57,7 +57,7 @@ select
     , coalesce(full_price,0) full_price
     , customer_id
     , 'Order ' || (
-            case
+            case status
                 when 1 then 'created'
                 when 2 then 'paid'
                 else 'canceled'
