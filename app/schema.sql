@@ -1,7 +1,7 @@
 -- Создание таблицы "Заказы" (Orders)
 CREATE TABLE Orders (
     order_id Serial PRIMARY KEY,
-    customer_id INTEGER,
+    customer_id BIGINT,
     order_date date,
     -- 1 -- заказ создан
     -- 2 -- заказ оплачен
