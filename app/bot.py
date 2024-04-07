@@ -233,13 +233,15 @@ def pay_order(query):
         ,message_id=query.message.id
         ,reply_markup=None
     )
+    total_amount=int(total_price * 100)
 
     prices = [
-        LabeledPrice(label='Working Time Machine', amount=int(total_price * 100))
+        LabeledPrice(label='Working Time Machine', amount=total_amount)
     ]
 
-    customer_id = query.from_user.id
-    shopping_cart[customer_id] = order_id
+    kb = types.InlineKeyboardMarkup()
+    kb.add(types.InlineKeyboardButton(text=f'Pay {total_price: .2f}', pay=True))
+    kb.add(types.InlineKeyboardButton(text='Reject payment ❌', callback_data='reject_payment'))
 
     invoice = bot.send_invoice(
         query.message.chat.id,  # chat_id
@@ -250,16 +252,25 @@ def pay_order(query):
         config.payment_api_token,  # provider_token
         'rub',  # currency
         prices,  # prices
+        reply_markup = kb,
         photo_url='http://erkelzaar.tsudao.com/models/perrotta/TIME_MACHINE.jpg',
         photo_height=512,  # !=0/None or picture won't be shown
         photo_width=512,
         photo_size=512,
         is_flexible=False,  # True If you need to set up Shipping Fee
         start_parameter='time-machine-example'
+        #
     )
 
 
 
+@bot.callback_query_handler(func=lambda q: q.data.startswith('reject_payment'))
+def reject_payment(query):
+    bot.delete_message(
+        query.message.chat.id
+        ,query.message.id
+    )
+    show_start_menu(query)
 
 @bot.pre_checkout_query_handler(func=lambda query: True)
 def checkout(pre_checkout_query):
@@ -322,7 +333,6 @@ def answer_any(query):
         ,text=query.data
     )
 
-# bot.send_invoice()
 
 bot.set_my_commands(
     commands=[
