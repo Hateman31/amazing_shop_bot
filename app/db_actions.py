@@ -209,7 +209,21 @@ class SQL:
             return self.fetch_rows(sql, customer_id, interval)
 
 
+    def check_opened_order(self, customer_id):
+        sql = """
+                select 1 x
+                where exists(
+                    select *
+                    from orders
+                    where status = 1
+                        AND customer_id = %s)"""
+
+        if self.fetch_rows(sql, customer_id):
+            return  True
+        return False
+
 if __name__ == '__main__':
     from db_config import CONN_STR
 
     db_client = SQL(CONN_STR)
+
