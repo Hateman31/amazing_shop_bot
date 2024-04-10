@@ -12,12 +12,14 @@ from telebot.types import LabeledPrice, ShippingOption
 import utils
 from pathlib import Path
 from datetime import datetime
+from shipping import getShippingOptions
 
 db_client = SQL(CONN_STR)
 shopping_cart = Vedis(':mem:')
 
 bot = telebot.TeleBot(config.token)
 
+SHIPPING_OPTIONS = getShippingOptions()
 
 @bot.message_handler(commands=['start'])
 def start(msg):
@@ -257,12 +259,9 @@ def pay_order(query):
         photo_height=512,  # !=0/None or picture won't be shown
         photo_width=512,
         photo_size=512,
-        is_flexible=False,  # True If you need to set up Shipping Fee
-        start_parameter='time-machine-example'
-        #
+        is_flexible=True,  # True If you need to set up Shipping Fee
+        need_shipping_address= True
     )
-
-
 
 @bot.callback_query_handler(func=lambda q: q.data.startswith('reject_payment'))
 def reject_payment(query):
@@ -280,9 +279,12 @@ def checkout(pre_checkout_query):
                                                 " try to pay again in a few minutes, we need a small rest.")
 @bot.shipping_query_handler(func=lambda query: True)
 def shipping(shipping_query):
-    print(shipping_query)
-    # bot.answer_shipping_query(shipping_query.id, ok=True, shipping_options=shipping_options,
-    #                           error_message='Oh, seems like our Dog couriers are having a lunch right now. Try again later!')
+    # print(SHIPPING_OPTIONS)
+    bot.answer_shipping_query(
+        shipping_query.id,
+        ok=True,
+        shipping_options=SHIPPING_OPTIONS,
+        error_message='Oh, seems like our Dog couriers are having a lunch right now. Try again later!')
 
 
 @bot.message_handler(content_types=['successful_payment'])
