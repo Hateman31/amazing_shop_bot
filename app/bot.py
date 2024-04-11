@@ -25,6 +25,14 @@ SHIPPING_OPTIONS = getShippingOptions()
 def start(msg):
     show_start_menu(msg)
 
+@bot.callback_query_handler(func=lambda x: x.data == 'show_start_menu')
+def start_menu(query):
+    bot.delete_message(
+        chat_id=query.message.chat.id
+        ,message_id=query.message.id
+    )
+    show_start_menu(query)
+
 def show_start_menu(event):
     chat_id = None
     if type(event) == types.Message:
@@ -61,15 +69,21 @@ def show_start_menu(event):
 
 @bot.callback_query_handler(func=lambda q: q.data.startswith('make_order'))
 def make_order(query):
+    bot.delete_message(
+        chat_id=query.message.chat.id
+        , message_id=query.message.id
+    )
+
     customer_id = query.from_user.id
 
-    if db_client.check_opened_order(customer_id):
+    order_id = db_client.check_opened_order(customer_id)
+    if order_id:
         bot.send_message(
             chat_id=query.message.chat.id
             , text='You have 1 unpaid order! Do you want to proceed your purchase ?'
             , reply_markup=types.InlineKeyboardMarkup().add(
-                types.InlineKeyboardButton('Proceed purchase', callback_data='test_edit_order')
-                    ,types.InlineKeyboardButton('Get back', callback_data='test_cancel_order')
+                types.InlineKeyboardButton('Proceed purchase', callback_data=f'confirm_order{order_id}')
+                    ,types.InlineKeyboardButton('Get back', callback_data='show_start_menu')
             )
         )
 
@@ -81,11 +95,6 @@ def make_order(query):
 
     catalog = db_client.get_catalog(order_id)
     kb = get_catalog_kb(catalog)
-
-    bot.delete_message(
-        chat_id=query.message.chat.id
-        ,message_id=query.message.id
-    )
 
     bot.send_message(
         chat_id=query.message.chat.id
@@ -257,6 +266,7 @@ def pay_order(query):
     kb = types.InlineKeyboardMarkup()
     kb.add(types.InlineKeyboardButton(text=f'Pay {total_price: .2f}', pay=True))
     kb.add(types.InlineKeyboardButton(text='Reject payment ❌', callback_data='reject_payment'))
+    kb.add(types.InlineKeyboardButton(text='Enter promo code 💯', callback_data='enter_promo_code'))
 
     invoice = bot.send_invoice(
         query.message.chat.id,  # chat_id
