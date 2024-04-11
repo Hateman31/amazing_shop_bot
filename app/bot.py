@@ -25,6 +25,15 @@ SHIPPING_OPTIONS = getShippingOptions()
 def start(msg):
     show_start_menu(msg)
 
+@bot.callback_query_handler(func=lambda x: x.data == 'show_start_menu')
+def start_menu(query):
+    bot.delete_message(
+        chat_id=query.message.chat.id
+        ,message_id=query.message.id
+    )
+
+    show_start_menu(query)
+
 def show_start_menu(event):
     chat_id = None
     if type(event) == types.Message:
@@ -63,13 +72,14 @@ def show_start_menu(event):
 def make_order(query):
     customer_id = query.from_user.id
 
-    if db_client.check_opened_order(customer_id):
+    order_id = db_client.check_opened_order(customer_id)
+    if order_id:
         bot.send_message(
             chat_id=query.message.chat.id
             , text='You have 1 unpaid order! Do you want to proceed your purchase ?'
             , reply_markup=types.InlineKeyboardMarkup().add(
-                types.InlineKeyboardButton('Proceed purchase', callback_data='test_edit_order')
-                    ,types.InlineKeyboardButton('Get back', callback_data='test_cancel_order')
+                types.InlineKeyboardButton('Proceed purchase', callback_data=f'confirm_order{order_id}')
+                    ,types.InlineKeyboardButton('Get back', callback_data='show_start_menu')
             )
         )
 

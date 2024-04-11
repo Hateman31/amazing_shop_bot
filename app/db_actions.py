@@ -211,16 +211,15 @@ class SQL:
 
     def check_opened_order(self, customer_id):
         sql = """
-                select 1 x
-                where exists(
-                    select *
-                    from orders
-                    where status = 1
-                        AND customer_id = %s)"""
+                select order_id
+                from orders
+                where status = 1
+                    AND customer_id = %s
+                order by order_id
+                limit 1"""
 
-        if self.fetch_rows(sql, customer_id):
-            return  True
-        return False
+        rows = self.fetch_rows(sql, customer_id)
+        return rows[0][0] if rows else None
 
 if __name__ == '__main__':
     from db_config import CONN_STR
