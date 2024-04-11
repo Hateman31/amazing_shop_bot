@@ -150,14 +150,14 @@ def get_orders_history(query):
     user_id = query.from_user.id
     orders = db_client.get_orders_history(user_id)
     now = datetime.now()
-    headers = 'order_date full_price'.split(' ')
+    headers = 'order_date full_price Order_status'.split(' ')
 
     folder = Path.cwd().parent / "docs" / f'{user_id}'
 
     if not folder.exists():
         folder.mkdir()
 
-    fname = folder / f'{now.year}-{now.month}-{now.day}_{now.hour}-{now.minute}.csv'
+    fname = folder / f'{now.year}-{now.month}-{now.day}_{now.hour}-{now.minute:02d}.csv'
     utils.rows_to_csv(orders, fname, headers=headers)
 
     bot.delete_message(

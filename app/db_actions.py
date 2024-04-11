@@ -199,15 +199,16 @@ class SQL:
 
 
     def get_orders_history(self, customer_id, period=None):
+        sql = 'select order_date, full_price, status from Orders_history_vw where customer_id = %s'
+        rows = []
         if not period:
-            sql = 'select * from Orders_history_vw where customer_id = %s'
-            return self.fetch_rows(sql, customer_id)
+            rows = self.fetch_rows(sql, customer_id)
         else:
             interval = f'{period} month'
-            sql = 'select * from Orders_history_vw where customer_id = %s '\
-                  "and order_date > (now()::date - interval %s )"
-            return self.fetch_rows(sql, customer_id, interval)
-
+            sql += " and order_date > (now()::date - interval %s )"
+            rows = self.fetch_rows(sql, customer_id, interval)
+        return [
+            (order_date, f"{full_price:.2f}", status) for order_date, full_price, status in rows]
 
     def check_opened_order(self, customer_id):
         sql = """
