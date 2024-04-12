@@ -42,7 +42,6 @@ def show_start_menu(event):
         chat_id = event.message.chat.id
 
     client = db_client.get_customer(event.from_user.id)
-    print(f'show_start_menu__func {client=} {event.from_user.id=}')
 
     kb=types.InlineKeyboardMarkup().add(
         types.InlineKeyboardButton(
@@ -146,11 +145,12 @@ def add_item(query):
         ,reply_markup=kb
     )
 
-
-@bot.callback_query_handler(func=lambda q: q.data.startswith('orders_history'))
+@bot.callback_query_handler(func=lambda x: x.data.startswith('history'))
 def get_orders_history(query):
     user_id = query.from_user.id
-    orders = db_client.get_orders_history(user_id)
+    period = query.data.replace('history_', '')
+    orders = db_client.get_orders_history(user_id, period)
+
     now = datetime.now()
     headers = 'order_date full_price order_status'.split(' ')
 
@@ -164,23 +164,33 @@ def get_orders_history(query):
 
     bot.delete_message(
         chat_id=query.message.chat.id
-        ,message_id=query.message.id
+        , message_id=query.message.id
     )
+
     if orders:
         bot.send_document(
             chat_id=query.message.chat.id
-            , document= open(fname, 'rb').read()
+            , document=open(fname, 'rb').read()
             , visible_file_name=fname.name
-        )
-        bot.send_message(
-            chat_id=query.message.chat.id
-            , text='This file is containing all your purchases!'
         )
     else:
         bot.send_message(
             chat_id=query.message.chat.id
             , text='You dont have any orders!'
         )
+
+@bot.callback_query_handler(func=lambda q: q.data.startswith('orders_history'))
+def get_orders_history_options(query):
+    bot.delete_message(
+        chat_id=query.message.chat.id
+        , message_id=query.message.id
+    )
+
+    bot.send_message(
+        chat_id=query.message.chat.id
+        ,text='Choose period for report:'
+        ,reply_markup = PERIOD_OPTIONS
+    )
 
 @bot.callback_query_handler(func=lambda x: x.data.startswith('add_one'))
 def item_menu(query):

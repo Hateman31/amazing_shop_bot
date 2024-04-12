@@ -16,11 +16,16 @@ def order_confirmation_kb(order_id):
         , types.InlineKeyboardButton('Cancel ❌', callback_data=f'cancel_order{order_id}')
     )
 
-def get_period_options_kb(customer_id):
+def get_period_options_kb():
     return types.InlineKeyboardMarkup(row_width=4).add(
-        types.InlineKeyboardButton('1 month', callback_data=f'history{customer_id}_1')
-        , types.InlineKeyboardButton('3 month', callback_data=f'history{customer_id}_3')
-        , types.InlineKeyboardButton('6 month', callback_data=f'history{customer_id}_6')
+        types.InlineKeyboardButton('1 month', callback_data=f'history_1')
+        , types.InlineKeyboardButton('3 month', callback_data=f'history_3')
+        , types.InlineKeyboardButton('6 month', callback_data=f'history_6')
+    ).add(
+        types.InlineKeyboardButton(
+            'Go Back'
+            , callback_data='show_start_menu'
+        )
     )
 
 def get_catalog_kb(catalog, order_id = None):
@@ -52,4 +57,7 @@ def get_catalog_kb(catalog, order_id = None):
     else:
         kb.add(cancel_btn )
     return kb
+
+
+PERIOD_OPTIONS = get_period_options_kb()
 
