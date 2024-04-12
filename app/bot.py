@@ -159,7 +159,8 @@ def get_orders_history(query):
     if not folder.exists():
         folder.mkdir()
 
-    fname = folder / f'{now.year}-{now.month}-{now.day}_{now.hour}-{now.minute: 02d}.csv'
+    period_name = f"{period} months" if period > '1' else f"{period} month"
+    fname = folder / f'{now:%Y-%m-%d_%H-%M}({period_name}).csv'
     utils.rows_to_csv(orders, fname, headers=headers)
 
     bot.delete_message(
