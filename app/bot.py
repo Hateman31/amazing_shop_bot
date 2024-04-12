@@ -72,6 +72,11 @@ def show_start_menu(event):
 def make_order(query):
     customer_id = query.from_user.id
 
+    bot.delete_message(
+        chat_id=query.message.chat.id
+        ,message_id=query.message.id
+    )
+
     order_id = db_client.check_opened_order(customer_id)
     if order_id:
         bot.send_message(
@@ -92,10 +97,6 @@ def make_order(query):
     catalog = db_client.get_catalog(order_id)
     kb = get_catalog_kb(catalog)
 
-    bot.delete_message(
-        chat_id=query.message.chat.id
-        ,message_id=query.message.id
-    )
 
     bot.send_message(
         chat_id=query.message.chat.id
