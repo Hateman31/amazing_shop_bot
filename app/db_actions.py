@@ -167,7 +167,7 @@ class SQL:
         catalog_query = (
             '''select 
                     %s > 0 prev_page
-                    , %s < (count(1) / 5 )::int+1 next_page
+                    , %s < (count(1) / 5 )::int next_page
             from products 
             where is_active = 1'''
         )
