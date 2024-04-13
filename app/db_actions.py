@@ -47,27 +47,31 @@ class SQL:
         with psycopg2.connect(self.conn_str) as conn:
             with conn.cursor() as cursor:
                 cursor.execute(
-                    'select * from Customers where customer_id = %s '
+                    'select * '
+                        'from Customers where customer_id = %s '
                     , [user_id]
                 )
 
                 return cursor.fetchone()
 
-    def get_catalog(self, order_id = None):
-        catalog_query = 'select * from Products '
-
+    def get_catalog(self, order_id = None, page_num = 0):
+        catalog_query = 'select product_id, product_name, price, category from Products '
+        page = ' limit 5 offset 5 * %s'
         with psycopg2.connect(self.conn_str) as conn:
             with conn.cursor() as cursor:
                 if order_id:
                     catalog_query += (
                         'where product_id not in ('
-                            'select product_id from Order_Items where order_id = %s)')
+                            'select product_id from Order_Items where order_id = %s)'
+                            + page
+                    )
                     cursor.execute(
-                        catalog_query, [order_id]
+                        catalog_query, [order_id, page_num]
                     )
                 else:
                     cursor.execute(
-                        catalog_query
+                        catalog_query + page
+                        , [page_num]
                     )
                 return cursor.fetchall()
 
@@ -173,6 +177,26 @@ class SQL:
 
                 return result
 
+    def get_pages(self,order_id = None,  page_num = 0):
+        prev_page , next_page = False, False
+        catalog_query = (
+            '''select 
+                    %s > 0 prev_page
+                    , %s < (count(1) / 5 )::int+1 next_page
+            from products '''
+        )
+        if order_id:
+            catalog_query += (
+                    'where product_id not in ('
+                    'select product_id from Order_Items where order_id = %s)')
+            result = self.fetch_rows(catalog_query, page_num, page_num, order_id)
+        else:
+            result = self.fetch_rows(catalog_query, page_num, page_num)
+
+        if result:
+            prev_page, next_page = result[0]
+        return prev_page, next_page
+
     def get_order_total_price(self, order_id):
         sql = """select sum(price*quantity) full_price
                 from Order_items oims
@@ -229,4 +253,3 @@ if __name__ == '__main__':
     from db_config import CONN_STR
 
     db_client = SQL(CONN_STR)
-

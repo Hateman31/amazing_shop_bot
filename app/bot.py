@@ -70,12 +70,12 @@ def show_start_menu(event):
 @bot.callback_query_handler(func=lambda q: q.data.startswith('make_order'))
 def make_order(query):
     customer_id = query.from_user.id
-
     bot.delete_message(
         chat_id=query.message.chat.id
         ,message_id=query.message.id
     )
 
+    page_num = 0
     order_id = db_client.check_opened_order(customer_id)
     if order_id:
         bot.send_message(
@@ -90,19 +90,41 @@ def make_order(query):
         return
 
     order_id = db_client.create_order(customer_id)
-
     shopping_cart[customer_id] = order_id
+    catalog = db_client.get_catalog(order_id, page_num=page_num)
+    prev_page, next_page = db_client.get_pages(order_id, page_num)
+    if catalog:
+        kb = get_catalog_kb(catalog, next_page = next_page, prev_page = prev_page)
+        bot.send_message(
+            chat_id=query.message.chat.id
+            , text='Choose item for your order:'
+            , reply_markup=kb
+        )
+    else:
+        kb = get_catalog_kb(catalog, )
+        bot.send_message(
+            chat_id=query.message.chat.id
+            , text='Choose item for your order:'
+            , reply_markup=kb
+        )
 
-    catalog = db_client.get_catalog(order_id)
-    kb = get_catalog_kb(catalog)
 
+@bot.callback_query_handler(func=lambda q: q.data.startswith('get_page'))
+def get_catalog_page(query):
+    customer_id = query.from_user.id
+    order_id = db_client.check_opened_order(customer_id)
+    page_num = int(query.data.replace('get_page', ''))
+
+    catalog = db_client.get_catalog(order_id, page_num)
+    prev_page, next_page = db_client.get_pages(order_id, page_num)
+
+    kb = get_catalog_kb(catalog, order_id, page_num, prev_page, next_page)
 
     bot.send_message(
-        chat_id=query.message.chat.id
-        , text='Choose item for your order:'
-        , reply_markup=kb
+        text='Choose item for purchase'
+        , chat_id=query.message.chat.id
+        ,reply_markup=kb
     )
-
 
 @bot.callback_query_handler(func=lambda q: q.data.startswith('add_item'))
 def add_item(query):

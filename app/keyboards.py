@@ -28,23 +28,41 @@ def get_period_options_kb():
         )
     )
 
-def get_catalog_kb(catalog, order_id = None):
+def get_catalog_kb(catalog, order_id = None,page_num=0,  prev_page = False, next_page = False):
     kb = types.InlineKeyboardMarkup()
 
     order_id = order_id or ''
+
+    next_btn = types.InlineKeyboardButton(
+        text='>>'
+        ,callback_data=f'get_page{page_num+1}'
+    )
+
+    prev_btn = types.InlineKeyboardButton(
+        text='<<'
+        , callback_data=f'get_page{page_num - 1}'
+    )
 
     cancel_btn = types.InlineKeyboardButton(
                 text='Cancel'
                 ,callback_data=f'cancel_order{order_id}'
             )
     for item in catalog:
-        item_id, product_name, price,  _ = item
+        item_id, product_name, price, category = item
         kb.add(
             types.InlineKeyboardButton(
-                text=f'{product_name}({price}$)'
+                text=f'{product_name}({price}$)({category})'
                 , callback_data=f'add_item_{item_id}'
             )
         )
+
+    if prev_page and next_page:
+        kb.add(prev_btn, next_btn)
+    elif prev_page:
+        kb.add(prev_btn)
+    else:
+        kb.add(next_btn)
+
     if order_id:
         ok_btn = types.InlineKeyboardButton(
                 text='OK'
