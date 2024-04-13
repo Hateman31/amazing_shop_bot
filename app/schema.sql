@@ -28,7 +28,9 @@ CREATE TABLE Products (
     product_id Serial PRIMARY KEY,
     product_name TEXT,
     price DECIMAL(10, 2),
+    is_active smallint default 1,
     category TEXT
+    check (is_active = 1 or is_active = 2 )
 );
 
 -- Вставка данных в таблицу "Товары"
@@ -41,6 +43,15 @@ VALUES
     (205, 'Товар5', 30.00, 'Категория1'),
     (206, 'Товар6', 35.00, 'Категория2');
 
+insert into products(product_name, price, category)
+values
+		('Mafia 2',801, 'games'),
+		('Assassin''s Creed II',2136, 'games'),
+		('Battlefield 3',1088, 'games'),
+		('World of Warcraft: Cataclysm',1634, 'games'),
+		('World of Warcraft',661, 'games'),
+		('Fortnite',1070, 'games'),
+		('Euro Truck Simulator 2',2333, 'games');
 
 -- drop view Orders_history_vw;
 -- select * from Orders_history_vw
