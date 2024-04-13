@@ -261,22 +261,20 @@ def confirm_item(query):
 def confirm_order(query):
     order_id = query.data.replace('confirm_order', '')
     summary = db_client.get_order_summary(order_id)
+    payable = len(summary) > 1
 
     bot.delete_message(
         chat_id=query.message.chat.id
         ,message_id=query.message.id
     )
 
-    bot.answer_callback_query(
-        callback_query_id=query.id
-        , text=f'Ваш заказ #{order_id} готов к оплате.'
-    )
+    summary_msg = utils.get_order_summary_msg(summary)
 
     bot.send_message(
         chat_id=query.message.chat.id
-        , text = summary
+        , text=summary_msg
         , parse_mode='Markdown'
-        , reply_markup=order_confirmation_kb(order_id)
+        , reply_markup=order_confirmation_kb(order_id, payable = payable)
     )
 
 @bot.callback_query_handler(func=lambda x: x.data.startswith('pay_order'))

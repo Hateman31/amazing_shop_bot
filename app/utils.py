@@ -12,6 +12,18 @@ def rows_to_csv(rows,filename, headers=None):
 
     return True
 
+def get_order_summary_msg(table):
+    result = 'Product name  | Quantity | Full price\n'
+    for _, product_name, quantity, full_price in table[1:]:
+        table_row = f'{product_name} || {quantity} || {full_price}'
+        result += table_row + '\n'
+
+    total = table[0]
+    total_str = f"{total[1]}: {total[2]} {total[3]} $"
+    result += '-' * len(total_str) + '\n'
+    result += total_str
+
+    return result
 
 if __name__ == '__main__':
     from db_actions import SQL

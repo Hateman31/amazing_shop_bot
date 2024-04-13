@@ -160,22 +160,7 @@ class SQL:
                 "from main "+
                 "order by 1 ")
         # print(order_id)
-        with psycopg2.connect(self.conn_str) as conn:
-            with conn.cursor() as cursor:
-                cursor.execute(sql, [order_id])
-
-                table = cursor.fetchall()
-                result = 'Product name  | Quantity | Full price\n'
-                for _, product_name, quantity, full_price in table[1:]:
-                    table_row = f'{product_name} || {quantity} || {full_price}'
-                    result += table_row + '\n'
-
-                total = table[0]
-                total_str = f"{total[1]}: {total[2]} {total[3]} $"
-                result += '-' * len(total_str) + '\n'
-                result += total_str
-
-                return result
+        return self.fetch_rows(sql, order_id)
 
     def get_pages(self,order_id = None,  page_num = 0):
         prev_page , next_page = False, False
@@ -183,11 +168,12 @@ class SQL:
             '''select 
                     %s > 0 prev_page
                     , %s < (count(1) / 5 )::int+1 next_page
-            from products '''
+            from products 
+            where is_active = 1'''
         )
         if order_id:
             catalog_query += (
-                    'where product_id not in ('
+                    ' and product_id not in ('
                     'select product_id from Order_Items where order_id = %s)')
             result = self.fetch_rows(catalog_query, page_num, page_num, order_id)
         else:
