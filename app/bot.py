@@ -93,21 +93,18 @@ def make_order(query):
     shopping_cart[customer_id] = order_id
     catalog = db_client.get_catalog(order_id, page_num=page_num)
     prev_page, next_page = db_client.get_pages(order_id, page_num)
-    if catalog:
-        kb = get_catalog_kb(catalog, next_page = next_page, prev_page = prev_page)
-        bot.send_message(
-            chat_id=query.message.chat.id
-            , text='Choose item for your order:'
-            , reply_markup=kb
-        )
-    else:
-        kb = get_catalog_kb(catalog, )
-        bot.send_message(
-            chat_id=query.message.chat.id
-            , text='Choose item for your order:'
-            , reply_markup=kb
-        )
+    kb = get_catalog_kb(catalog, next_page=next_page, prev_page=prev_page)
 
+    msg = {
+        True:'Choose item for your order:'
+        , False: "We have nothing to offer you 😟"
+    }
+
+    bot.send_message(
+        chat_id=query.message.chat.id
+        , text=msg[bool(catalog)]
+        , reply_markup=kb
+    )
 
 @bot.callback_query_handler(func=lambda q: q.data.startswith('get_page'))
 def get_catalog_page(query):
