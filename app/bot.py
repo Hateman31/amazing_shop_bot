@@ -117,9 +117,10 @@ def get_catalog_page(query):
 
     kb = get_catalog_kb(catalog, order_id, page_num, prev_page, next_page)
 
-    bot.send_message(
+    bot.edit_message_text(
         text='Choose item for purchase'
         , chat_id=query.message.chat.id
+        , message_id=query.message.id
         ,reply_markup=kb
     )
 
@@ -261,15 +262,11 @@ def confirm_order(query):
     summary = db_client.get_order_summary(order_id)
     payable = len(summary) > 1
 
-    bot.delete_message(
-        chat_id=query.message.chat.id
-        ,message_id=query.message.id
-    )
-
     summary_msg = utils.get_order_summary_msg(summary)
 
-    bot.send_message(
+    bot.edit_message_text(
         chat_id=query.message.chat.id
+        , message_id=query.message.id
         , text=summary_msg
         , parse_mode='Markdown'
         , reply_markup=order_confirmation_kb(order_id, payable = payable)
@@ -358,9 +355,10 @@ def edit_order(query):
     customer_id = query.from_user.id
     order_id = db_client.check_opened_order(customer_id)
 
-    bot.send_message(
+    bot.edit_message_text(
         text='What do you want to do?'
         ,chat_id=query.message.chat.id
+        ,message_id=query.message.id
         , reply_markup=types.InlineKeyboardMarkup().add(
             types.InlineKeyboardButton('➕Add one item', callback_data=f'get_page0'),
         ).add(
