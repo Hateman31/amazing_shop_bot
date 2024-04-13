@@ -135,7 +135,8 @@ def add_item(query):
     quantity = 1
     # 1. Создать заказ (таблица Orders)
     # 2. Получить order_id
-    order_id = int(shopping_cart[customer_id])
+    # order_id = int(shopping_cart[customer_id])
+    order_id = db_client.check_opened_order(customer_id)
 
     # 3. Добавить запись в Order_Items , quantity = 1
     # 4. Получить order_item_id
@@ -357,7 +358,24 @@ def got_payment(message):
 
 @bot.callback_query_handler(func=lambda x: x.data.startswith('edit_order'))
 def edit_order(query):
-    pass
+    customer_id = query.from_user.id
+    order_id = db_client.check_opened_order(customer_id)
+
+    bot.send_message(
+        text='What do you want to do?'
+        ,chat_id=query.message.chat.id
+        , reply_markup=types.InlineKeyboardMarkup().add(
+            types.InlineKeyboardButton('➕Add one item', callback_data=f'get_page0'),
+        ).add(
+            types.InlineKeyboardButton('➖Delete one item', callback_data=f'del_one{order_id}'),
+        ).add(
+            types.InlineKeyboardButton('📝Item amount edit', callback_data=f'edit_amount{order_id}'),
+        ).add(
+            types.InlineKeyboardButton('❌Cancel', callback_data=f'confirm_order{order_id}'),
+        )
+    )
+
+
 
 
 @bot.callback_query_handler(func=lambda x: x.data.startswith('cancel_order'))
